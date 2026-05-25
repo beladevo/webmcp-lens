@@ -1,0 +1,25 @@
+{
+  "name": "webmcp-inspect",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "compile": "wxt prepare && tsc --noEmit",
+    "check": "npm run compile && npm run build"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "@wxt-dev/module-react": "^1.2.2",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "wxt": "^0.20.26"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.6.3"
+  }
+}

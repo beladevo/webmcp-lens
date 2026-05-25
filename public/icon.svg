@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="WebMCP Lens">
+  <rect width="128" height="128" rx="24" fill="#fffaf0"/>
+  <path d="M24 26h80a8 8 0 0 1 8 8v58a8 8 0 0 1-8 8H24a8 8 0 0 1-8-8V34a8 8 0 0 1 8-8Z" fill="#173d3a"/>
+  <path d="M31 43h19m28 0h19M31 63h14m38 0h14M31 83h25m22 0h19" stroke="#f7f3ea" stroke-width="7" stroke-linecap="round"/>
+  <path d="M55 43h20M49 63h30M60 83h14" stroke="#8bbf9f" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="64" cy="64" r="24" fill="none" stroke="#e24d2f" stroke-width="8"/>
+  <path d="M82 82l21 21" stroke="#e24d2f" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="64" cy="64" r="6" fill="#fffaf0"/>
+</svg>
