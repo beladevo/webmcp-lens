@@ -8,14 +8,15 @@ export default defineConfig({
     description: 'Inspect, test, and annotate WebMCP tools.',
     version: '0.1.0',
     icons: {
-      16: '/icon.svg',
-      32: '/icon.svg',
-      48: '/icon.svg',
-      128: '/icon.svg',
+      48: '/icon48.png',
+      128: '/icon128.png',
     },
     action: {
       default_title: 'WebMCP Lens',
-      default_icon: '/icon.svg',
+      default_icon: {
+        48: '/icon48.png',
+        128: '/icon128.png',
+      },
     },
     permissions: ['activeTab', 'scripting', 'storage', 'tabs'],
     host_permissions: ['<all_urls>'],

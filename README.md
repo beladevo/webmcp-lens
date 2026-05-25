@@ -1,5 +1,7 @@
 # WebMCP Lens
 
+![WebMCP Lens](public/webmcp_lens.png)
+
 Chrome extension for inspecting WebMCP tools.
 
 ## Use

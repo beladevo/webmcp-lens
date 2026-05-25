@@ -1,1 +1,1 @@
-chrome.devtools.panels.create('WebMCP', '/icon.svg', '/devtools-panel.html');
+chrome.devtools.panels.create('WebMCP', '/icon48.png', '/devtools-panel.html');
