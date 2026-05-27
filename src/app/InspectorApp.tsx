@@ -43,6 +43,7 @@ export function InspectorApp({ target, variant }: InspectorAppProps) {
           tools={inspector.tools}
           selectedOriginalName={inspector.selectedTool?.originalName ?? ''}
           onSelect={inspector.selectTool}
+          loading={inspector.loading}
         />
 
         <section className="detail">
@@ -57,10 +58,11 @@ export function InspectorApp({ target, variant }: InspectorAppProps) {
               />
 
               <label className="field">
-                <span>Args</span>
+                <span>Arguments</span>
                 <textarea
                   className="codeInput short"
                   spellCheck={false}
+                  placeholder={'{\n  "key": "value"\n}'}
                   value={inspector.argsText}
                   onChange={(event) => inspector.setArgsText(event.target.value)}
                 />
@@ -80,7 +82,15 @@ export function InspectorApp({ target, variant }: InspectorAppProps) {
               </label>
             </>
           ) : (
-            <div className="empty">{inspector.loading ? 'Scanning.' : 'No tools.'}</div>
+            <div className="empty">
+              {inspector.loading ? (
+                <span className="spinner" />
+              ) : inspector.status === 'unsupported' ? (
+                'No WebMCP API on this page.'
+              ) : (
+                'No tools found.'
+              )}
+            </div>
           )}
         </section>
       </section>
@@ -92,25 +102,48 @@ function ToolRail({
   selectedOriginalName,
   tools,
   onSelect,
+  loading,
 }: {
   selectedOriginalName: string;
   tools: DisplayTool[];
   onSelect: (tool: DisplayTool) => void;
+  loading: boolean;
 }) {
+  const [search, setSearch] = useState('');
+  const filtered = search ? tools.filter((t) => t.name.toLowerCase().includes(search.toLowerCase())) : tools;
+
   return (
     <nav className="rail" aria-label="Tools">
-      {tools.map((tool) => (
-        <button
-          className={tool.originalName === selectedOriginalName ? 'toolItem selected' : 'toolItem'}
-          key={tool.originalName}
-          type="button"
-          onClick={() => onSelect(tool)}
-          title={tool.description || tool.name}
-        >
-          <span>{tool.name}</span>
-          {tool.hasOverride ? <i>override</i> : null}
-        </button>
-      ))}
+      <div className="railHeader">
+        <input
+          className="railSearch"
+          type="search"
+          placeholder="Filter…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Filter tools"
+        />
+        <span className="railCount">{loading ? '…' : tools.length}</span>
+      </div>
+      <div className="railItems">
+        {filtered.length === 0 && !loading ? (
+          <div className="railEmpty">{tools.length === 0 ? 'No tools.' : 'No match.'}</div>
+        ) : (
+          filtered.map((tool) => (
+            <button
+              className={tool.originalName === selectedOriginalName ? 'toolItem selected' : 'toolItem'}
+              key={tool.originalName}
+              type="button"
+              onClick={() => onSelect(tool)}
+              title={tool.description || tool.name}
+            >
+              <span>{tool.name}</span>
+              {tool.description && <p className="toolDesc">{tool.description}</p>}
+              {tool.hasOverride ? <i>override</i> : null}
+            </button>
+          ))
+        )}
+      </div>
     </nav>
   );
 }
@@ -142,10 +175,13 @@ function ToolHeader({
   if (!editable) {
     return (
       <section className="toolHeader">
-        <p className="originalName">{tool.originalName}</p>
+        {tool.originalName !== tool.name && <p className="originalName">{tool.originalName}</p>}
         <h2>{tool.name}</h2>
-        <p>{tool.description || 'No description.'}</p>
-        <pre className="schema">{tool.inputSchema}</pre>
+        {tool.description && <p className="toolDescription">{tool.description}</p>}
+        <details className="schemaDetails">
+          <summary>Input schema</summary>
+          <pre className="schema">{tool.inputSchema}</pre>
+        </details>
       </section>
     );
   }
@@ -160,11 +196,11 @@ function ToolHeader({
         <div className="miniActions">
           <button className="ghostButton" type="button" onClick={() => onReset(tool.originalName)}>
             <RotateCcw size={14} />
-            One
+            Reset
           </button>
           <button className="ghostButton" type="button" onClick={onResetAll}>
             <RotateCcw size={14} />
-            All
+            Reset All
           </button>
         </div>
       </div>

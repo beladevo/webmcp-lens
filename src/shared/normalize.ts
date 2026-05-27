@@ -75,13 +75,39 @@ export function cleanOverride(override: ToolOverride | undefined): ToolOverride 
 
 export function makeDefaultArgs(schemaText: string): string {
   try {
-    const schema = JSON.parse(schemaText) as { properties?: Record<string, unknown>; required?: unknown };
+    const schema = JSON.parse(schemaText) as {
+      properties?: Record<string, { type?: string | string[]; default?: unknown }>;
+      required?: unknown;
+    };
     const properties = schema.properties ?? {};
-    const args = Object.fromEntries(Object.keys(properties).map((key) => [key, '']));
+    const args = Object.fromEntries(Object.keys(properties).map((key) => [key, defaultForProp(properties[key]!)]));
 
     return JSON.stringify(args, null, 2);
   } catch {
     return '{}';
+  }
+}
+
+function defaultForProp(prop: { type?: string | string[]; default?: unknown }): unknown {
+  if (prop.default !== undefined) {
+    return prop.default;
+  }
+
+  const type = Array.isArray(prop.type) ? prop.type[0] : prop.type;
+  switch (type) {
+    case 'number':
+    case 'integer':
+      return 0;
+    case 'boolean':
+      return false;
+    case 'array':
+      return [];
+    case 'object':
+      return {};
+    case 'null':
+      return null;
+    default:
+      return '';
   }
 }
 

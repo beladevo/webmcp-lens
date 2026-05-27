@@ -52,6 +52,11 @@ export type RuntimeRequest =
       args: JsonValue;
     };
 
+export type RuntimeEvent =
+  | { type: 'WEBMCP_ACTIVE_TAB_CHANGED'; source?: 'background'; tabId?: number; url?: string }
+  | { type: 'WEBMCP_TAB_UPDATED'; source?: 'background'; tabId: number; url?: string }
+  | { type: 'WEBMCP_TOOLS_CHANGED'; source?: 'background'; tabId?: number; url?: string };
+
 export type RuntimeResponse =
   | { ok: true; data: ToolSnapshot | ToolExecutionResult }
   | { ok: false; error: string };

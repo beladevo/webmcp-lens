@@ -99,10 +99,16 @@ h2 {
   border-radius: 6px;
   color: #173d3a;
   background: #fffaf0;
+  transition: background 0.12s, opacity 0.12s;
 }
 
 .iconButton {
   width: 34px;
+}
+
+.iconButton:hover,
+.ghostButton:hover {
+  background: #e8f0e2;
 }
 
 .primaryButton {
@@ -110,6 +116,10 @@ h2 {
   color: #fffaf0;
   border-color: #a83422;
   padding: 0 12px;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #cc3f22;
 }
 
 .primaryButton:disabled {
@@ -168,6 +178,57 @@ h2 {
   flex-direction: column;
   border-right: 1px solid #173d3a;
   background: #eef2df;
+  overflow: hidden;
+}
+
+.railHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 7px;
+  border-bottom: 1px solid #ced8c6;
+  background: #e4ebd6;
+  flex-shrink: 0;
+}
+
+.railSearch {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  border: 1px solid #b8c9ae;
+  border-radius: 4px;
+  background: #f4f8ee;
+  color: #17211d;
+  font-size: 12px;
+  padding: 0 7px;
+  outline: none;
+}
+
+.railSearch:focus {
+  border-color: #173d3a;
+  background: #fff;
+}
+
+.railSearch::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+.railCount {
+  color: #607168;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.railEmpty {
+  padding: 16px 10px;
+  color: #607168;
+  font-size: 12px;
+  text-align: center;
+}
+
+.railItems {
+  flex: 1;
   overflow: auto;
 }
 
@@ -177,13 +238,18 @@ h2 {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   border: 0;
   border-bottom: 1px solid #ced8c6;
   background: transparent;
   padding: 7px 9px;
   color: #17211d;
   text-align: left;
+  transition: background 0.1s;
+}
+
+.toolItem:hover:not(.selected) {
+  background: #dde8ce;
 }
 
 .toolItem span {
@@ -194,10 +260,29 @@ h2 {
   white-space: nowrap;
 }
 
+.toolItem .toolDesc {
+  margin: 0;
+  width: 100%;
+  overflow: hidden;
+  color: #607168;
+  font-size: 10.5px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolItem.selected .toolDesc {
+  color: rgba(255, 250, 240, 0.65);
+}
+
 .toolItem i {
   color: #b84027;
   font-size: 10px;
   font-style: normal;
+}
+
+.toolItem.selected i {
+  color: #f4a48a;
 }
 
 .toolItem.selected {
@@ -313,6 +398,68 @@ input,
   min-height: 240px;
   place-items: center;
   color: #607168;
+  font-size: 13px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(23, 61, 58, 0.2);
+  border-top-color: #173d3a;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.toolDescription {
+  margin: 0;
+  color: #4a6158;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.schemaDetails {
+  border: 1px solid #c9c0b2;
+  border-radius: 6px;
+  background: #fffcf5;
+  overflow: hidden;
+}
+
+.schemaDetails summary {
+  cursor: pointer;
+  padding: 6px 10px;
+  color: #607168;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  user-select: none;
+  list-style: none;
+}
+
+.schemaDetails summary::after {
+  content: ' ▸';
+  font-size: 9px;
+}
+
+.schemaDetails[open] summary::after {
+  content: ' ▾';
+}
+
+.schemaDetails summary:hover {
+  background: rgba(23, 61, 58, 0.04);
+}
+
+.schemaDetails .schema {
+  border: 0;
+  border-top: 1px solid #c9c0b2;
+  border-radius: 0;
+  background: transparent;
+  margin: 0;
+  max-height: 240px;
 }
 
 @media (max-width: 480px) {

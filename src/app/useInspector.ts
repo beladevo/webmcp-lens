@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyOverrides, makeDefaultArgs } from '../shared/normalize';
 import { sendRuntimeRequest } from '../shared/chromeMessages';
 import { clearOverride, clearOverrides, getOverrides, setOverride } from '../shared/storage';
 import type {
   DisplayTool,
   JsonValue,
+  RuntimeEvent,
   TargetScope,
   ToolExecutionResult,
   ToolOverride,
@@ -37,6 +38,8 @@ const initialState: InspectorState = {
 
 export function useInspector(target: TargetScope) {
   const [state, setState] = useState<InspectorState>(initialState);
+  const selectedNameRef = useRef('');
+  selectedNameRef.current = state.selectedOriginalName;
 
   const selectedTool = useMemo(
     () => state.tools.find((tool) => tool.originalName === state.selectedOriginalName) ?? state.tools[0],
@@ -53,7 +56,9 @@ export function useInspector(target: TargetScope) {
       });
       const overrides = await getOverrides(snapshot.origin);
       const tools = applyOverrides(snapshot.tools, overrides);
-      const selected = tools.find((tool) => tool.originalName === state.selectedOriginalName) ?? tools[0];
+      const currentName = selectedNameRef.current;
+      const selected = tools.find((tool) => tool.originalName === currentName) ?? tools[0];
+      const toolChanged = selected?.originalName !== currentName;
 
       setState((current) => ({
         ...current,
@@ -63,7 +68,7 @@ export function useInspector(target: TargetScope) {
         origin: snapshot.origin,
         error: snapshot.error ?? '',
         selectedOriginalName: selected?.originalName ?? '',
-        argsText: selected ? makeDefaultArgs(selected.inputSchema) : '{}',
+        ...(toolChanged && selected ? { argsText: makeDefaultArgs(selected.inputSchema) } : {}),
       }));
     } catch (error) {
       setState((current) => ({
@@ -73,7 +78,7 @@ export function useInspector(target: TargetScope) {
         error: error instanceof Error ? error.message : 'Could not inspect tab.',
       }));
     }
-  }, [state.selectedOriginalName, target]);
+  }, [target]);
 
   const selectTool = useCallback((tool: DisplayTool) => {
     setState((current) => ({
@@ -98,8 +103,7 @@ export function useInspector(target: TargetScope) {
       return;
     }
 
-    const mappedTool = state.tools.find((tool) => tool.originalName === selectedTool.name);
-    const originalName = mappedTool?.originalName ?? selectedTool.originalName;
+    const originalName = selectedTool.originalName;
 
     setState((current) => ({ ...current, executing: true, error: '', resultText: '' }));
 
@@ -123,7 +127,7 @@ export function useInspector(target: TargetScope) {
         error: error instanceof Error ? error.message : 'Tool failed.',
       }));
     }
-  }, [selectedTool, state.argsText, state.tools, target]);
+  }, [selectedTool, state.argsText, target]);
 
   const saveOverride = useCallback(
     async (originalName: string, override: ToolOverride) => {
@@ -162,6 +166,19 @@ export function useInspector(target: TargetScope) {
     refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    function onRuntimeMessage(message: unknown): void {
+      if (!isRefreshEventForTarget(message, target)) {
+        return;
+      }
+
+      refresh();
+    }
+
+    chrome.runtime.onMessage.addListener(onRuntimeMessage);
+    return () => chrome.runtime.onMessage.removeListener(onRuntimeMessage);
+  }, [refresh, target]);
+
   return {
     ...state,
     selectedTool,
@@ -173,4 +190,25 @@ export function useInspector(target: TargetScope) {
     saveOverride,
     selectTool,
   };
+}
+
+function isRefreshEventForTarget(message: unknown, target: TargetScope): message is RuntimeEvent {
+  if (!message || typeof message !== 'object') {
+    return false;
+  }
+
+  const event = message as RuntimeEvent;
+  if (
+    event.type !== 'WEBMCP_ACTIVE_TAB_CHANGED' &&
+    event.type !== 'WEBMCP_TAB_UPDATED' &&
+    event.type !== 'WEBMCP_TOOLS_CHANGED'
+  ) {
+    return false;
+  }
+
+  if (target.kind === 'active-tab') {
+    return event.type === 'WEBMCP_ACTIVE_TAB_CHANGED' || event.type === 'WEBMCP_TAB_UPDATED' || event.type === 'WEBMCP_TOOLS_CHANGED';
+  }
+
+  return event.tabId === target.tabId;
 }
